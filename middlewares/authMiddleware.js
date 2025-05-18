@@ -8,8 +8,8 @@ exports.authenticateToken = async (req, res, next) => {
   if (!token) return res.status(401).json({ message: 'Token tidak ditemukan' });
 
   try {
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    const user = await User.findByPk(decoded.userId);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findByPk(decoded.id);  // Ganti decoded.userId jadi decoded.id
     if (!user) return res.status(401).json({ message: 'User tidak ditemukan' });
 
     req.user = user; // simpan info user ke req

@@ -4,13 +4,12 @@ const userController = require('../controllers/userController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const { body } = require('express-validator');
 
-router.get('/', authMiddleware, userController.getAllUsers);
-
-router.get('/:id', authMiddleware, userController.getUserById);
+router.get('/', authMiddleware.authenticateToken, userController.getAllUsers);
+router.get('/:id', authMiddleware.authenticateToken, userController.getUserById);
 
 router.put(
   '/:id',
-  authMiddleware,
+  authMiddleware.authenticateToken,
   [
     body('name').optional().notEmpty().withMessage('Nama tidak boleh kosong'),
     body('email').optional().isEmail().withMessage('Email tidak valid'),
@@ -20,6 +19,6 @@ router.put(
   userController.updateUser
 );
 
-router.delete('/:id', authMiddleware, userController.deleteUser);
+router.delete('/:id', authMiddleware.authenticateToken, userController.deleteUser);
 
 module.exports = router;

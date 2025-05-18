@@ -1,26 +1,45 @@
-require('dotenv').config();
 const express = require('express');
-const cors = require('cors');
 const app = express();
+const dotenv = require('dotenv');
+const cors = require('cors');
+const { sequelize } = require('./models');
 
-const authRoutes = require('./routes/authRoutes');
+// Load environment variables
+dotenv.config();
 
-// middleware global
+// Middlewares
 app.use(cors());
 app.use(express.json());
 
-// route prefix
+// Routes
+const authRoutes = require('./routes/authRoutes');
+const postRoutes = require('./routes/postRoutes');
+const commentRoutes = require('./routes/commentRoutes');
+const userRoutes = require('./routes/userRoutes');
+
+// Use Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/posts', postRoutes);
+app.use('/api/comments', commentRoutes);
+app.use('/api/users', userRoutes);
 
-// contoh endpoint dasar
+// Root endpoint
 app.get('/', (req, res) => {
-  res.send('Blog Backend API Aktif');
+  res.json({ message: 'Blog Backend API is running' });
 });
 
-// error handling fallback
-app.use((req, res) => {
-  res.status(404).json({ message: 'Endpoint tidak ditemukan' });
+// Error handling (optional)
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ message: 'Internal Server Error' });
 });
 
+// Start server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server berjalan di http://localhost:${PORT}`));
+sequelize.sync().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+}).catch((err) => {
+  console.error('Unable to connect to the database:', err);
+});
