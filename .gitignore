@@ -1,0 +1,38 @@
+# Node modules (dependencies)
+node_modules/
+note.txt
+# Environment variable files
+.env
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output
+dist/
+build/
+
+# IDE/editor configurations
+.vscode/
+.idea/
+
+# MacOS Finder directory attributes
+.DS_Store
+
+# Windows Installer files
+Thumbs.db
+
+# Optional: ignore database files if using SQLite or similar
+*.sqlite
+*.db
+
+# Optional: ignore test or coverage reports
+coverage/
+test-coverage/
+
+# Optional: ignore npm package lock or yarn lock (only if you prefer not to track them)
+# package-lock.json
+# yarn.lock
