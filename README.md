@@ -26,11 +26,11 @@ Backend sederhana untuk aplikasi blog yang mendukung:
 ### ✏️ Postingan
 - Penulis bisa membuat, mengedit, menghapus posting miliknya
 - Editor bisa mengelola semua posting
-- Pembaca hanya bisa melihat postingan dengan status `published`
+- Pembaca bisa melihat postingan
 
 ### 💬 Komentar
 - Pembaca dan penulis bisa berkomentar
-- Komentar hanya bisa dibuat pada postingan `published`
+- Komentar bisa dibuat pada postingan
 - Pengguna hanya bisa mengedit/hapus komentarnya sendiri
 
 ---
