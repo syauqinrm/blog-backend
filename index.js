@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const dotenv = require('dotenv');
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 const { sequelize } = require('./models');
 
 // Load environment variables
@@ -11,17 +12,17 @@ dotenv.config();
 app.use(cors());
 app.use(express.json());
 
-// Routes
-const authRoutes = require('./routes/authRoutes');
-const postRoutes = require('./routes/postRoutes');
-const commentRoutes = require('./routes/commentRoutes');
-const userRoutes = require('./routes/userRoutes');
+// 🔐 Rate Limiting: max 100 requests per 15 menit per IP
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 menit
+  max: 100,
+  message: { message: 'Terlalu banyak permintaan dari IP ini, coba lagi nanti.' },
+});
+app.use(limiter);
 
-// Use Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/posts', postRoutes);
-app.use('/api/comments', commentRoutes);
-app.use('/api/users', userRoutes);
+// API Routes (Versioning)
+const apiRoutes = require('./routes');
+app.use('/api/v1', apiRoutes); // ⬅️ versioned route prefix
 
 // Root endpoint
 app.get('/', (req, res) => {
