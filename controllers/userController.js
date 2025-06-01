@@ -1,96 +1,38 @@
-const { User } = require('../models');
-const bcrypt = require('bcrypt');
+const userService = require('../services/userService');
+const userTransformer = require('../transformers/userTransformer');
 
-// GET /users
 exports.getAllUsers = async (req, res) => {
   try {
-    if (req.user.role !== 'editor') {
-      return res.status(403).json({ message: 'Akses ditolak. Hanya editor yang diizinkan.' });
-    }
-
-    const users = await User.findAll({
-      attributes: ['id', 'name', 'email', 'role', 'createdAt', 'updatedAt']
-    });
-
-    res.json(users);
+    const users = await userService.getAllUsers(req.user);
+    res.json(users.map(userTransformer.transform));
   } catch (error) {
-    res.status(500).json({ message: 'Gagal mengambil data user', error });
+    res.status(error.code || 500).json({ message: error.message });
   }
 };
 
-// GET /users/:id
 exports.getUserById = async (req, res) => {
   try {
-    if (req.user.role !== 'editor') {
-      return res.status(403).json({ message: 'Akses ditolak.' });
-    }
-
-    const user = await User.findByPk(req.params.id, {
-      attributes: ['id', 'name', 'email', 'role', 'createdAt', 'updatedAt']
-    });
-
-    if (!user) return res.status(404).json({ message: 'User tidak ditemukan' });
-
-    res.json(user);
+    const user = await userService.getUserById(req.user, req.params.id);
+    res.json(userTransformer.transform(user));
   } catch (error) {
-    res.status(500).json({ message: 'Gagal mengambil data user', error });
+    res.status(error.code || 500).json({ message: error.message });
   }
 };
 
-// PUT /users/:id
 exports.updateUser = async (req, res) => {
   try {
-    if (req.user.role !== 'editor') {
-      return res.status(403).json({ message: 'Akses ditolak.' });
-    }
-
-    const user = await User.findByPk(req.params.id);
-    if (!user) return res.status(404).json({ message: 'User tidak ditemukan' });
-
-    if (user.role === 'editor') {
-      return res.status(403).json({ message: 'Tidak dapat mengubah user dengan role editor.' });
-    }
-
-    const { name, email, role, password } = req.body;
-
-    // Cegah update ke role editor
-    if (role === 'editor') {
-      return res.status(403).json({ message: 'Tidak dapat mengubah role menjadi editor.' });
-    }
-
-    // Siapkan update data
-    const updateData = { name, email, role };
-
-    // Jika ada password, hash terlebih dahulu
-    if (password) {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      updateData.password = hashedPassword;
-    }
-
-    await user.update(updateData);
-    res.json({ message: 'User berhasil diperbarui', user });
+    const user = await userService.updateUser(req.user, req.params.id, req.body);
+    res.json({ message: 'User berhasil diperbarui', user: userTransformer.transform(user) });
   } catch (error) {
-    res.status(500).json({ message: 'Gagal memperbarui user', error });
+    res.status(error.code || 500).json({ message: error.message });
   }
 };
 
-// DELETE /users/:id
 exports.deleteUser = async (req, res) => {
   try {
-    if (req.user.role !== 'editor') {
-      return res.status(403).json({ message: 'Akses ditolak.' });
-    }
-
-    const user = await User.findByPk(req.params.id);
-    if (!user) return res.status(404).json({ message: 'User tidak ditemukan' });
-
-    if (user.role === 'editor') {
-      return res.status(403).json({ message: 'Tidak dapat menghapus user dengan role editor.' });
-    }
-
-    await user.destroy();
-    res.json({ message: 'User berhasil dihapus' });
+    const result = await userService.deleteUser(req.user, req.params.id);
+    res.json({ message: result });
   } catch (error) {
-    res.status(500).json({ message: 'Gagal menghapus user', error });
+    res.status(error.code || 500).json({ message: error.message });
   }
 };

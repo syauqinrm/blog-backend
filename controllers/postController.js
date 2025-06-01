@@ -1,93 +1,56 @@
-const { Post, User, Comment } = require('../models');
+const postService = require('../services/postService');
+const postTransformer = require('../transformers/postTransformer');
 
-// GET /posts (Publik)
 exports.getAllPosts = async (req, res) => {
   try {
-    const posts = await Post.findAll({
-      include: {
-        model: User,
-        attributes: ['id', 'name', 'email']
-      }
-    });
-    res.json(posts);
+    const posts = await postService.getAllPosts();
+    res.json(posts.map(postTransformer.transform));
   } catch (error) {
-    res.status(500).json({ message: 'Gagal mengambil data postingan', error });
+    res.status(500).json({ message: error.message });
   }
 };
 
-// GET /posts/:id (Publik)
 exports.getPostById = async (req, res) => {
   try {
-    const post = await Post.findByPk(req.params.id, {
-      include: [
-        {
-          model: User,
-          attributes: ['id', 'name', 'email']
-        },
-        {
-          model: Comment,
-          include: {
-            model: User,
-            attributes: ['id', 'name']
-          }
-        }
-      ]
-    });
+    const post = await postService.getPostById(req.params.id);
     if (!post) {
       return res.status(404).json({ message: 'Postingan tidak ditemukan' });
     }
-    res.json(post);
+    res.json(postTransformer.transform(post));
   } catch (error) {
-    res.status(500).json({ message: 'Gagal mengambil data postingan', error });
+    res.status(500).json({ message: error.message });
   }
 };
 
-// POST /posts (Penulis dan Editor)
 exports.createPost = async (req, res) => {
   try {
-    const { title, content, status } = req.body;
-    const post = await Post.create({
-      title,
-      content,
-      status: status || 'draft',
-      user_id: req.user.id
+    const post = await postService.createPost({
+      userId: req.user.id,
+      ...req.body,
     });
-    res.status(201).json({ message: 'Post created successfully!', post });
+    res.status(201).json({
+      message: 'Post created successfully!',
+      post: postTransformer.transform(post),
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Gagal membuat postingan', error });
+    res.status(500).json({ message: error.message });
   }
 };
 
-// PUT /posts/:id (Pemilik atau Editor)
 exports.updatePost = async (req, res) => {
   try {
-    const post = await Post.findByPk(req.params.id);
-    if (!post) return res.status(404).json({ message: 'Postingan tidak ditemukan' });
-
-    if (post.user_id !== req.user.id && req.user.role !== 'editor') {
-      return res.status(403).json({ message: 'Akses ditolak' });
-    }
-
-    await post.update(req.body);
-    res.json({ message: 'Post updated successfully!', post });
+    const post = await postService.updatePost(req.params.id, req.user, req.body);
+    res.json({ message: 'Post updated successfully!', post: postTransformer.transform(post) });
   } catch (error) {
-    res.status(500).json({ message: 'Gagal mengedit postingan', error });
+    res.status(error.code || 500).json({ message: error.message });
   }
 };
 
-// DELETE /posts/:id (Pemilik atau Editor)
 exports.deletePost = async (req, res) => {
   try {
-    const post = await Post.findByPk(req.params.id);
-    if (!post) return res.status(404).json({ message: 'Postingan tidak ditemukan' });
-
-    if (post.user_id !== req.user.id && req.user.role !== 'editor') {
-      return res.status(403).json({ message: 'Akses ditolak' });
-    }
-
-    await post.destroy();
-    res.json({ message: 'Post deleted successfully!' });
+    const result = await postService.deletePost(req.params.id, req.user);
+    res.json({ message: result });
   } catch (error) {
-    res.status(500).json({ message: 'Gagal menghapus postingan', error });
+    res.status(error.code || 500).json({ message: error.message });
   }
 };
