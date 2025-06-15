@@ -6,6 +6,9 @@ const rateLimit = require("express-rate-limit");
 const { createHandler } = require("graphql-http/lib/use/express");
 const { sequelize } = require("./models");
 
+// Set timezone to Asia/Jakarta
+process.env.TZ = 'Asia/Jakarta';
+
 // GraphQL imports
 const schema = require("./graphql/schema");
 const resolvers = require("./graphql/resolvers");
