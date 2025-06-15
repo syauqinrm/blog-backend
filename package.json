@@ -4,7 +4,12 @@
   "description": "Aplikasi backend blog menggunakan Express.js, Sequelize ORM, dan MySQL.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "NODE_ENV=test jest",
+    "test:watch": "NODE_ENV=test jest --watch",
+    "test:coverage": "NODE_ENV=test jest --coverage",
+    "test:auth": "NODE_ENV=test jest tests/auth.test.js",
+    "test:posts": "NODE_ENV=test jest tests/posts.test.js",
+    "test:comments": "NODE_ENV=test jest tests/comments.test.js",
     "start": "node index.js",
     "dev": "nodemon index.js"
   },
@@ -33,7 +38,10 @@
     "sequelize": "^6.37.7"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "jest": "^30.0.0",
     "nodemon": "^3.1.10",
-    "sequelize-cli": "^6.6.3"
+    "sequelize-cli": "^6.6.3",
+    "supertest": "^7.1.1"
   }
 }
